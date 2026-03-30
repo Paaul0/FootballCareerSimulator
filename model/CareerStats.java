@@ -9,8 +9,10 @@ public class CareerStats {
     private int totalAssistencias;
     private int totalTitulos;
     private int totalTemporadas;
-    private List<Season> historico = new ArrayList<>();
-    private List<String> titulos   = new ArrayList<>();
+    private List<Season> historico       = new ArrayList<>();
+    private List<String> titulos         = new ArrayList<>();
+    private List<String> premiosIndividuais = new ArrayList<>();
+    private int bolasDeOuro = 0;
 
     public void registrarTemporada(Season s) {
         historico.add(s);
@@ -25,19 +27,28 @@ public class CareerStats {
         totalTitulos++;
     }
 
-    public int getTotalJogos()         { return totalJogos; }
-    public int getTotalGols()          { return totalGols; }
-    public int getTotalAssistencias()  { return totalAssistencias; }
-    public int getTotalTitulos()       { return totalTitulos; }
-    public int getTotalTemporadas()    { return totalTemporadas; }
-    public List<Season> getHistorico() { return historico; }
-    public List<String> getTitulos()   { return titulos; }
+    public void registrarPremioIndividual(String premio) {
+        premiosIndividuais.add(premio);
+        if (premio.contains("Bola de Ouro")) bolasDeOuro++;
+    }
+
+    public int getTotalJogos()                    { return totalJogos; }
+    public int getTotalGols()                     { return totalGols; }
+    public int getTotalAssistencias()             { return totalAssistencias; }
+    public int getTotalTitulos()                  { return totalTitulos; }
+    public int getTotalTemporadas()               { return totalTemporadas; }
+    public List<Season> getHistorico()            { return historico; }
+    public List<String> getTitulos()              { return titulos; }
+    public List<String> getPremiosIndividuais()   { return premiosIndividuais; }
+    public int getBolaDeOuro()                    { return bolasDeOuro; }
 
     public int calcularPontuacaoFinal() {
         return (totalGols * 4)
-             + (totalAssistencias * 3)
-             + (totalTitulos * 50)
-             + (int)(totalJogos * 0.5);
+               + (totalAssistencias * 3)
+               + (totalTitulos * 50)
+               + (bolasDeOuro * 100)
+               + (premiosIndividuais.size() * 20)
+               + (int)(totalJogos * 0.5);
     }
 
     public String getRating() {

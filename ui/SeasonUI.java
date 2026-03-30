@@ -3,6 +3,7 @@ package ui;
 import model.CareerEvent;
 import model.PlayerRole;
 import model.Season;
+import service.ChampionshipService.ResultadoCampeonato;
 
 import java.util.List;
 
@@ -26,6 +27,28 @@ public class SeasonUI {
             }
         }
         System.out.println("══════════════════════════════");
+    }
+
+    public static void exibirCampeonatos(List<ResultadoCampeonato> resultados) {
+        if (resultados.isEmpty()) return;
+
+        System.out.println("\n🏟️  CAMPEONATOS DA TEMPORADA:");
+        for (ResultadoCampeonato rc : resultados) {
+            String icone = switch (rc.resultado()) {
+                case "Campeão"      -> "🏆";
+                case "Vice-campeão" -> "🥈";
+                case "Semifinal"    -> "🔹";
+                default             -> "❌";
+            };
+            System.out.println("  " + icone + " " + rc.nomeCampeonato() + ": " + rc.resultado());
+        }
+    }
+
+    public static void exibirPremios(List<String> premios) {
+        if (premios.isEmpty()) return;
+        System.out.println("\n🎖️  PRÊMIOS INDIVIDUAIS:");
+        for (String p : premios)
+            System.out.println("  " + p);
     }
 
     public static void exibirMensagemRole(PlayerRole role) {

@@ -6,13 +6,14 @@ public class Club {
     private int nivel;
 
     public Club(String nome, Country pais, int nivel) {
-        this.nome = nome;
-        this.pais = pais;
+        this.nome  = nome;
+        this.pais  = pais;
         this.nivel = nivel;
     }
 
     public String getNome()    { return nome; }
     public Country getPais()   { return pais; }
+    public Country getCountry(){ return pais; }
     public int getNivel()      { return nivel; }
 
     @Override

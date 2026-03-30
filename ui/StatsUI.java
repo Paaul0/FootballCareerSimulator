@@ -28,6 +28,12 @@ public class StatsUI {
                 System.out.println("  🏆 " + t);
         }
 
+        if (!stats.getPremiosIndividuais().isEmpty()) {
+            System.out.println("\nPrêmios individuais:");
+            for (String p : stats.getPremiosIndividuais())
+                System.out.println("  " + p);
+        }
+
         System.out.println("\n──────────── HISTÓRICO ────────────");
         for (Season s : stats.getHistorico())
             System.out.println("  " + s);
@@ -43,7 +49,7 @@ public class StatsUI {
         System.out.println("║         FIM DE CARREIRA              ║");
         System.out.println("╚══════════════════════════════════════╝");
         System.out.println("\n" + jogador.getNome() + " pendurou as chuteiras aos "
-            + jogador.getIdade() + " anos.");
+                           + jogador.getIdade() + " anos.");
         exibirResumoCarreira(jogador, stats);
         System.out.println("\nObrigado por jogar! Até a próxima carreira.");
     }
