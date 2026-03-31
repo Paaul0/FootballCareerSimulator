@@ -14,7 +14,6 @@ public class EventService {
     private static final CareerEvent[] EVENTOS_DISPONIVEIS = {
             CareerEvent.LESAO_GRAVE,
             CareerEvent.ARTILHEIRO_DO_CAMPEONATO,
-            CareerEvent.MELHOR_DO_MUNDO,
             CareerEvent.REBAIXAMENTO,
             CareerEvent.CONVOCACAO_SELECAO,
             CareerEvent.ESCANDALO,

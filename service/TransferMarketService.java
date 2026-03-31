@@ -96,7 +96,6 @@ public class TransferMarketService {
         else if (score < 130) nivelMaximo = Math.min(nivelAtual + 1, 4);
         else                  nivelMaximo = 5;
 
-        // Fix do crash: garante que diff seja sempre pelo menos 1
         int diff = Math.max(1, nivelMaximo - nivelAtual + 1);
         int nivelSorteado = nivelAtual + r.nextInt(diff);
         nivelSorteado = Math.max(2, Math.min(nivelSorteado, 5));

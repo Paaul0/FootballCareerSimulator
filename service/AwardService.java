@@ -16,41 +16,39 @@ public class AwardService {
                                                CareerStats stats, int score) {
         List<String> premios = new ArrayList<>();
         int gols      = jogador.getGolsUltimaFase();
-        int jogos     = jogador.getJogosUltimaFase();
         int idade     = jogador.getIdade();
         int temporada = stats.getTotalTemporadas();
+        int nivelClube = jogador.getClubeAtual().getNivel();
+        int titulos   = stats.getTotalTitulos();
 
-        // Artilheiro da temporada — precisa de score alto e muitos gols
-        if (gols >= 20 && score >= 100) {
-            int chance = gols >= 30 ? 70 : 40;
-            if (r.nextInt(100) < chance) {
+        // Artilheiro — mínimo 15 gols, chance maior com mais gols
+        if (gols >= 15 && score >= 80) {
+            int chance = gols >= 25 ? 70 : gols >= 20 ? 45 : 25;
+            if (r.nextInt(100) < chance)
                 premios.add("🥾 Artilheiro da Temporada (T" + temporada + " — " + gols + " gols)");
-            }
         }
 
-        // Melhor jogador da temporada — score muito alto
-        if (score >= 130 && (role == PlayerRole.TITULAR || role == PlayerRole.DESTAQUE)) {
-            int chance = score >= 160 ? 60 : 30;
-            if (r.nextInt(100) < chance) {
+        // Melhor jogador — score alto + clube decente + pelo menos 1 título na carreira
+        if (score >= 140 && nivelClube >= 3 && titulos >= 1
+            && (role == PlayerRole.TITULAR || role == PlayerRole.DESTAQUE)) {
+            int chance = score >= 170 ? 50 : 25;
+            if (r.nextInt(100) < chance)
                 premios.add("🏅 Melhor Jogador da Temporada (T" + temporada + ")");
-            }
         }
 
         // Melhor jovem sub-23
         if (idade <= 23 && score >= 80 && role != PlayerRole.JOVEM_PROMESSA) {
             int chance = score >= 110 ? 65 : 35;
-            if (r.nextInt(100) < chance) {
+            if (r.nextInt(100) < chance)
                 premios.add("⭐ Melhor Jovem da Temporada (T" + temporada + " — " + idade + " anos)");
-            }
         }
 
-        // Bola de Ouro — muito difícil, exige score altíssimo e clube de elite
-        if (score >= 170 && jogador.getClubeAtual().getNivel() >= 4) {
+        // Bola de Ouro — muito difícil, exige clube elite + títulos + score altíssimo
+        if (score >= 180 && nivelClube >= 4 && titulos >= 2) {
             int bolaDeOuroGanhas = stats.getBolaDeOuro();
-            int chance = bolaDeOuroGanhas == 0 ? 25 : 15; // mais difícil ganhar de novo
-            if (r.nextInt(100) < chance) {
+            int chance = bolaDeOuroGanhas == 0 ? 20 : 10;
+            if (r.nextInt(100) < chance)
                 premios.add("🌟 Bola de Ouro (T" + temporada + ")");
-            }
         }
 
         return premios;
