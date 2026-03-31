@@ -2,11 +2,7 @@ package service;
 
 import model.*;
 
-import java.util.Random;
-
 public class SeasonService {
-
-    private static final Random r = new Random();
 
     public static Season simularTemporada(Player jogador, int numeroTemporada, PlayerRole role) {
         int idade = jogador.getIdade();
@@ -23,8 +19,11 @@ public class SeasonService {
         jogador.setGolsUltimaFase(gols);
         jogador.setAssistenciasUltimaFase(assistencias);
 
+        // Guarda os gols reais ANTES dos eventos inflarem
+        jogador.setGolsReaisTemporada(gols);
+
         return new Season(numeroTemporada, jogador.getClubeAtual(), role,
-                          jogos, gols, assistencias, idade);
+                jogos, gols, assistencias, idade);
     }
 
     private static double calcularFatorIdade(int idade) {
@@ -37,11 +36,11 @@ public class SeasonService {
     }
 
     public static PlayerRole calcularNovoRole(PlayerRole roleAtual, int score) {
-        if (score >= 150 && roleAtual != PlayerRole.DESTAQUE) return PlayerRole.DESTAQUE;
-        if (score >= 100 && roleAtual == PlayerRole.ROTACAO)  return PlayerRole.TITULAR;
+        if (score >= 150 && roleAtual != PlayerRole.DESTAQUE)       return PlayerRole.DESTAQUE;
+        if (score >= 100 && roleAtual == PlayerRole.ROTACAO)        return PlayerRole.TITULAR;
         if (score >= 60  && roleAtual == PlayerRole.JOVEM_PROMESSA) return PlayerRole.ROTACAO;
-        if (score < 30   && roleAtual == PlayerRole.TITULAR)  return PlayerRole.ROTACAO;
-        if (score < 20   && roleAtual == PlayerRole.ROTACAO)  return PlayerRole.JOVEM_PROMESSA;
+        if (score < 30   && roleAtual == PlayerRole.TITULAR)        return PlayerRole.ROTACAO;
+        if (score < 20   && roleAtual == PlayerRole.ROTACAO)        return PlayerRole.JOVEM_PROMESSA;
         return roleAtual;
     }
 }

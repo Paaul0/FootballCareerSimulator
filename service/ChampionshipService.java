@@ -1,5 +1,6 @@
 package service;
 
+import model.Continent;
 import model.Club;
 import model.Country;
 import model.Player;
@@ -16,28 +17,25 @@ public class ChampionshipService {
     public record ResultadoCampeonato(
             String nomeCampeonato,
             String resultado,
-            boolean titulo
+            boolean titulo,
+            boolean rebaixado
     ) {}
 
     public static List<ResultadoCampeonato> simularCampeonatos(Player jogador, PlayerRole role) {
         List<ResultadoCampeonato> resultados = new ArrayList<>();
-        Club clube = jogador.getClubeAtual();
-        int nivel  = clube.getNivel();
+        Club clube   = jogador.getClubeAtual();
+        int nivel    = clube.getNivel();
         Country pais = clube.getCountry();
 
-        // Campeonato nacional (todos disputam)
         resultados.add(simularCampeonatoNacional(clube, role));
 
-        // Copa nacional (todos disputam)
         if (r.nextInt(100) < 70)
             resultados.add(simularCopaNacional(clube, role));
 
-        // Libertadores — apenas clubes da América do Sul nível 3+
-        if (pais.getContinent() == model.Continent.AMERICA_DO_SUL && nivel >= 3)
+        if (pais.getContinent() == Continent.AMERICA_DO_SUL && nivel >= 3)
             resultados.add(simularLibertadores(clube, role));
 
-        // Champions — apenas clubes da Europa nível 3+
-        if (pais.getContinent() == model.Continent.EUROPA && nivel >= 3)
+        if (pais.getContinent() == Continent.EUROPA && nivel >= 3)
             resultados.add(simularChampions(clube, role));
 
         return resultados;
@@ -47,27 +45,23 @@ public class ChampionshipService {
         String nome = nomeCampeonatoNacional(clube.getCountry());
         int nivel   = clube.getNivel();
 
-        // Brasileirão e ligas de pontos corridos — sem mata-mata, só campeão ou não
-        if (isPontosCorridos(clube.getCountry())) {
+        if (isPontosCorridos(clube.getCountry()))
             return simularPontosCorridos(nome, nivel, role);
-        }
 
-        // Outros países — fase de grupos + mata-mata
         int pontos = simularFaseDeGrupos(nivel, role);
         if (pontos < limiteEliminacao(nivel))
-            return new ResultadoCampeonato(nome, "Eliminado na fase de grupos", false);
+            return new ResultadoCampeonato(nome, "Eliminado na fase de grupos", false, false);
 
         String resultado = simularMataMataNacional(nivel, role);
-        return new ResultadoCampeonato(nome, resultado, resultado.equals("Campeão"));
+        return new ResultadoCampeonato(nome, resultado, resultado.equals("Campeão"), false);
     }
 
-    // Pontos corridos: só diz se foi campeão ou não, sem etapas intermediárias
     private static ResultadoCampeonato simularPontosCorridos(String nome, int nivel, PlayerRole role) {
         int chanceTitle = switch (nivel) {
             case 5 -> 45;
             case 4 -> 25;
             case 3 -> 10;
-            case 2 -> 3;  // Guarani campeão é raríssimo
+            case 2 -> 3;
             default -> 1;
         };
         int bonus = switch (role) {
@@ -77,44 +71,53 @@ public class ChampionshipService {
         };
 
         if (r.nextInt(100) < chanceTitle + bonus)
-            return new ResultadoCampeonato(nome, "Campeão", true);
+            return new ResultadoCampeonato(nome, "Campeão", true, false);
 
-        // Posição narrativa baseada no nível
+        int chanceRebaixamento = switch (nivel) {
+            case 2 -> 25;
+            case 3 -> 12;
+            case 4 -> 4;
+            case 5 -> 1;
+            default -> 0;
+        };
+
+        if (r.nextInt(100) < chanceRebaixamento)
+            return new ResultadoCampeonato(nome, "Rebaixado", false, true);
+
         String posicao = switch (nivel) {
             case 5 -> randomEntre("Vice-campeão", "3º lugar", "Top 4");
             case 4 -> randomEntre("Top 4", "Top 6", "Meio da tabela");
             case 3 -> randomEntre("Top 6", "Meio da tabela", "Zona de rebaixamento");
-            case 2 -> randomEntre("Meio da tabela", "Zona de rebaixamento", "Rebaixado");
+            case 2 -> randomEntre("Meio da tabela", "Zona de rebaixamento", "Meio da tabela");
             default -> "Meio da tabela";
         };
 
-        boolean rebaixado = posicao.equals("Rebaixado");
-        return new ResultadoCampeonato(nome, posicao, false);
+        return new ResultadoCampeonato(nome, posicao, false, false);
     }
 
     private static ResultadoCampeonato simularCopaNacional(Club clube, PlayerRole role) {
-        String nome = nomeCopaNacional(clube.getCountry());
-        int nivel   = clube.getNivel();
+        String nome  = nomeCopaNacional(clube.getCountry());
+        int nivel    = clube.getNivel();
         String resultado = simularMataMataNacional(nivel, role);
-        return new ResultadoCampeonato(nome, resultado, resultado.equals("Campeão"));
+        return new ResultadoCampeonato(nome, resultado, resultado.equals("Campeão"), false);
     }
 
     private static ResultadoCampeonato simularLibertadores(Club clube, PlayerRole role) {
         int nivel  = clube.getNivel();
         int pontos = simularFaseDeGrupos(nivel, role);
         if (pontos < 8)
-            return new ResultadoCampeonato("Libertadores", "Eliminado na fase de grupos", false);
+            return new ResultadoCampeonato("Libertadores", "Eliminado na fase de grupos", false, false);
         String resultado = simularMataMataContinental(nivel, role);
-        return new ResultadoCampeonato("Libertadores", resultado, resultado.equals("Campeão"));
+        return new ResultadoCampeonato("Libertadores", resultado, resultado.equals("Campeão"), false);
     }
 
     private static ResultadoCampeonato simularChampions(Club clube, PlayerRole role) {
         int nivel  = clube.getNivel();
         int pontos = simularFaseDeGrupos(nivel, role);
         if (pontos < 9)
-            return new ResultadoCampeonato("Champions League", "Eliminado na fase de grupos", false);
+            return new ResultadoCampeonato("Champions League", "Eliminado na fase de grupos", false, false);
         String resultado = simularMataMataContinental(nivel, role);
-        return new ResultadoCampeonato("Champions League", resultado, resultado.equals("Campeão"));
+        return new ResultadoCampeonato("Champions League", resultado, resultado.equals("Campeão"), false);
     }
 
     private static int simularFaseDeGrupos(int nivelClube, PlayerRole role) {
@@ -163,7 +166,7 @@ public class ChampionshipService {
             case 5 -> 65;
             case 4 -> 48;
             case 3 -> 32;
-            case 2 -> 12; // Guarani dificilmente chega na final
+            case 2 -> 12;
             default -> 5;
         };
         int bonus = switch (role) {
@@ -174,10 +177,10 @@ public class ChampionshipService {
         return base + bonus;
     }
 
-    // Ligas de pontos corridos (sem mata-mata)
     private static boolean isPontosCorridos(Country pais) {
         return switch (pais) {
-            case BRASIL, ESPANHA, ITALIA, PORTUGAL, URUGUAI, MEXICO, EUA -> true;
+            case BRASIL, ESPANHA, ITALIA, PORTUGAL, URUGUAI,
+                 MEXICO, EUA, FRANCA, ALEMANHA, INGLATERRA -> true;
             default -> false;
         };
     }
@@ -200,6 +203,9 @@ public class ChampionshipService {
             case URUGUAI   -> "Primeira División";
             case MEXICO    -> "Liga MX";
             case EUA       -> "MLS";
+            case FRANCA    -> "Ligue 1";
+            case ALEMANHA  -> "Bundesliga";
+            case INGLATERRA-> "Premier League";
         };
     }
 
@@ -213,6 +219,9 @@ public class ChampionshipService {
             case URUGUAI   -> "Copa Uruguay";
             case MEXICO    -> "Copa MX";
             case EUA       -> "US Open Cup";
+            case FRANCA    -> "Coupe de France";
+            case ALEMANHA  -> "DFB Pokal";
+            case INGLATERRA-> "FA Cup";
         };
     }
 }

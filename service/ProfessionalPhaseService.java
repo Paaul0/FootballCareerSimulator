@@ -19,19 +19,17 @@ public class ProfessionalPhaseService {
 
     public static int calcularGols(int jogos, Position position) {
         Random r = new Random();
-        double baseGols  = 0.45;
+        double baseGols   = 0.65; // aumentado de 0.45
         double fatorIdade = 0.85;
-        double aleatorio = 0.85 + (r.nextDouble() * 0.3);
-        double gols = jogos * baseGols * position.getFatorGols() * fatorIdade * aleatorio;
-        return (int) gols;
+        double aleatorio  = 0.85 + (r.nextDouble() * 0.3);
+        return (int)(jogos * baseGols * position.getFatorGols() * fatorIdade * aleatorio);
     }
 
     public static int calcularAssistencias(int jogos, Position position) {
         Random r = new Random();
-        double baseAssist = 0.30;
+        double baseAssist = 0.35; // leve aumento também
         double fatorIdade = 0.85;
-        double aleatorio = 0.85 + (r.nextDouble() * 0.3);
-        double assists = jogos * baseAssist * position.getFatorAssistencias() * fatorIdade * aleatorio;
-        return (int) assists;
+        double aleatorio  = 0.85 + (r.nextDouble() * 0.3);
+        return (int)(jogos * baseAssist * position.getFatorAssistencias() * fatorIdade * aleatorio);
     }
 }

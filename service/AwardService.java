@@ -14,21 +14,21 @@ public class AwardService {
 
     public static List<String> calcularPremios(Player jogador, PlayerRole role,
                                                CareerStats stats, int score) {
-        List<String> premios = new ArrayList<>();
-        int gols      = jogador.getGolsUltimaFase();
-        int idade     = jogador.getIdade();
-        int temporada = stats.getTotalTemporadas();
+        List<String> premios  = new ArrayList<>();
+        int golsReais  = jogador.getGolsReaisTemporada(); // gols reais, sem inflação de eventos
+        int idade      = jogador.getIdade();
+        int temporada  = stats.getTotalTemporadas();
         int nivelClube = jogador.getClubeAtual().getNivel();
-        int titulos   = stats.getTotalTitulos();
+        int titulos    = stats.getTotalTitulos();
 
-        // Artilheiro — mínimo 15 gols, chance maior com mais gols
-        if (gols >= 15 && score >= 80) {
-            int chance = gols >= 25 ? 70 : gols >= 20 ? 45 : 25;
+        // Artilheiro — usa gols reais, mínimo 20
+        if (golsReais >= 20) {
+            int chance = golsReais >= 35 ? 80 : golsReais >= 28 ? 55 : 30;
             if (r.nextInt(100) < chance)
-                premios.add("🥾 Artilheiro da Temporada (T" + temporada + " — " + gols + " gols)");
+                premios.add("🥾 Artilheiro da Temporada (T" + temporada + " — " + golsReais + " gols)");
         }
 
-        // Melhor jogador — score alto + clube decente + pelo menos 1 título na carreira
+        // Melhor jogador — score alto + clube decente + pelo menos 1 título
         if (score >= 140 && nivelClube >= 3 && titulos >= 1
             && (role == PlayerRole.TITULAR || role == PlayerRole.DESTAQUE)) {
             int chance = score >= 170 ? 50 : 25;
@@ -43,7 +43,7 @@ public class AwardService {
                 premios.add("⭐ Melhor Jovem da Temporada (T" + temporada + " — " + idade + " anos)");
         }
 
-        // Bola de Ouro — muito difícil, exige clube elite + títulos + score altíssimo
+        // Bola de Ouro
         if (score >= 180 && nivelClube >= 4 && titulos >= 2) {
             int bolaDeOuroGanhas = stats.getBolaDeOuro();
             int chance = bolaDeOuroGanhas == 0 ? 20 : 10;

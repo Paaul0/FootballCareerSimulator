@@ -1,7 +1,6 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CareerStats {
     private int totalJogos;
@@ -9,10 +8,14 @@ public class CareerStats {
     private int totalAssistencias;
     private int totalTitulos;
     private int totalTemporadas;
-    private List<Season> historico       = new ArrayList<>();
-    private List<String> titulos         = new ArrayList<>();
-    private List<String> premiosIndividuais = new ArrayList<>();
+    private List<Season> historico            = new ArrayList<>();
+    private List<String> titulos              = new ArrayList<>();
+    private List<String> premiosIndividuais   = new ArrayList<>();
     private int bolasDeOuro = 0;
+
+    // Stats por clube: chave = nome do clube
+    private Map<String, int[]> statsPorClube = new LinkedHashMap<>();
+    // int[0]=jogos, int[1]=gols, int[2]=assists, int[3]=titulos
 
     public void registrarTemporada(Season s) {
         historico.add(s);
@@ -20,11 +23,29 @@ public class CareerStats {
         totalGols         += s.getGols();
         totalAssistencias += s.getAssistencias();
         totalTemporadas++;
+
+        // Acumula stats por clube
+        String nomeClube = s.getClube().getNome();
+        statsPorClube.putIfAbsent(nomeClube, new int[]{0, 0, 0, 0});
+        int[] stats = statsPorClube.get(nomeClube);
+        stats[0] += s.getJogos();
+        stats[1] += s.getGols();
+        stats[2] += s.getAssistencias();
     }
 
     public void registrarTitulo(String titulo) {
         titulos.add(titulo);
         totalTitulos++;
+
+        // Extrai nome do clube do título para contabilizar
+        // formato: "Brasileirão (T3)" — registra no clube atual via método separado
+    }
+
+    public void registrarTituloComClube(String titulo, String nomeClube) {
+        titulos.add(titulo);
+        totalTitulos++;
+        statsPorClube.putIfAbsent(nomeClube, new int[]{0, 0, 0, 0});
+        statsPorClube.get(nomeClube)[3]++;
     }
 
     public void registrarPremioIndividual(String premio) {
@@ -32,15 +53,16 @@ public class CareerStats {
         if (premio.contains("Bola de Ouro")) bolasDeOuro++;
     }
 
-    public int getTotalJogos()                    { return totalJogos; }
-    public int getTotalGols()                     { return totalGols; }
-    public int getTotalAssistencias()             { return totalAssistencias; }
-    public int getTotalTitulos()                  { return totalTitulos; }
-    public int getTotalTemporadas()               { return totalTemporadas; }
-    public List<Season> getHistorico()            { return historico; }
-    public List<String> getTitulos()              { return titulos; }
-    public List<String> getPremiosIndividuais()   { return premiosIndividuais; }
-    public int getBolaDeOuro()                    { return bolasDeOuro; }
+    public int getTotalJogos()                  { return totalJogos; }
+    public int getTotalGols()                   { return totalGols; }
+    public int getTotalAssistencias()           { return totalAssistencias; }
+    public int getTotalTitulos()                { return totalTitulos; }
+    public int getTotalTemporadas()             { return totalTemporadas; }
+    public List<Season> getHistorico()          { return historico; }
+    public List<String> getTitulos()            { return titulos; }
+    public List<String> getPremiosIndividuais() { return premiosIndividuais; }
+    public int getBolaDeOuro()                  { return bolasDeOuro; }
+    public Map<String, int[]> getStatsPorClube(){ return statsPorClube; }
 
     public int calcularPontuacaoFinal() {
         return (totalGols * 4)

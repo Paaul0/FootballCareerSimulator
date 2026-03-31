@@ -27,10 +27,11 @@ public class CareerManager {
     }
 
     private void simularFaseBase() {
-        BaseCareer base = jogador.getBaseCareer();
+        BaseCareer base    = jogador.getBaseCareer();
         BaseOutcome outcome = BaseOutcomeService.decidir(base);
 
         System.out.println("\n══════════ FASE DE BASE ══════════");
+        System.out.println("Clube base    : " + jogador.getClubeBase().getNome());
         System.out.println("Anos na base  : 2");
         System.out.println("Títulos       : " + base.getTitulosBase());
         System.out.println("Gols          : " + base.getGolsBase());
@@ -43,14 +44,17 @@ public class CareerManager {
                 jogador.setClubeAtual(novoClube);
                 System.out.println("Mas encontrou uma chance no " + novoClube.getNome() + ".");
             }
-            case CONTINUA ->
-                    System.out.println("\n👍 Você foi promovido para o profissional do "
-                                       + jogador.getClubeAtual().getNome() + "!");
+            case CONTINUA -> {
+                Club profissional = BaseClubFactory.getClubeProfissional(jogador.getClubeBase());
+                jogador.setClubeAtual(profissional);
+                System.out.println("\n👍 Você foi promovido para o profissional do "
+                                   + profissional.getNome() + "!");
+            }
             case SAI_POR_ESCOLHA -> {
                 System.out.println("\n🌟 Sua base foi tão boa que outros clubes te querem!");
                 Club novoClube = ClubMarketService.buscarNovoClube(jogador.getPais());
-                System.out.println("Você escolheu ir para o " + novoClube.getNome() + ".");
                 jogador.setClubeAtual(novoClube);
+                System.out.println("Você escolheu ir para o " + novoClube.getNome() + ".");
             }
         }
 
@@ -92,26 +96,50 @@ public class CareerManager {
         // 3. Registrar temporada
         stats.registrarTemporada(temporada);
 
-        // 4. Exibir resultado da temporada
+        // 4. Exibir resultado
         SeasonUI.exibirResultadoTemporada(temporada, eventos);
 
         // 5. Simular campeonatos
         List<ResultadoCampeonato> campeonatos = ChampionshipService.simularCampeonatos(jogador, roleAtual);
         SeasonUI.exibirCampeonatos(campeonatos);
+
+        boolean foiRebaixado = false;
         for (ResultadoCampeonato rc : campeonatos) {
-            if (rc.titulo()) {
-                stats.registrarTitulo(rc.nomeCampeonato() + " (T" + temporadaAtual + ")");
+            if (rc.titulo())
+                stats.registrarTituloComClube(
+                        rc.nomeCampeonato() + " (T" + temporadaAtual + ")",
+                        jogador.getClubeAtual().getNome()
+                );
+            if (rc.rebaixado()) foiRebaixado = true;
+        }
+
+        // 6. Tratar rebaixamento
+        if (foiRebaixado) {
+            System.out.println("\n⬇️  Seu clube foi rebaixado!");
+            System.out.println("Você pode ficar e tentar o acesso ou buscar um novo clube.");
+            boolean ficar = MenuUI.confirmar("Deseja ficar no " + jogador.getClubeAtual().getNome() + "?");
+            if (!ficar) {
+                List<TransferOffer> propostas = TransferMarketService.gerarPropostas(jogador);
+                if (!propostas.isEmpty()) {
+                    TransferOffer escolhida = TransferUI.exibirPropostas(jogador, propostas);
+                    if (escolhida != null) {
+                        jogador.setClubeAtual(escolhida.getClube());
+                        roleAtual = escolhida.getRoleOferecido();
+                    }
+                } else {
+                    System.out.println("😞 Nenhuma proposta chegou. Você permanece no clube.");
+                }
             }
         }
 
-        // 6. Calcular e exibir prêmios individuais
+        // 7. Prêmios individuais
         score = PerformanceService.calcularScore(jogador);
         List<String> premios = AwardService.calcularPremios(jogador, roleAtual, stats, score);
         SeasonUI.exibirPremios(premios);
         for (String p : premios)
             stats.registrarPremioIndividual(p);
 
-        // 7. Atualizar role
+        // 8. Atualizar role
         PlayerRole novoRole = SeasonService.calcularNovoRole(roleAtual, score);
         if (novoRole != roleAtual) {
             System.out.println("\n🔄 Seu role mudou: " + roleAtual + " → " + novoRole);
@@ -119,19 +147,21 @@ public class CareerManager {
         }
         SeasonUI.exibirMensagemRole(roleAtual);
 
-        // 8. Propostas de transferência
-        List<TransferOffer> propostas = TransferMarketService.gerarPropostas(jogador);
-        TransferOffer escolhida = TransferUI.exibirPropostas(jogador, propostas);
-        if (escolhida != null) {
-            jogador.setClubeAtual(escolhida.getClube());
-            roleAtual = escolhida.getRoleOferecido();
+        // 9. Propostas de transferência (se não foi rebaixado)
+        if (!foiRebaixado) {
+            List<TransferOffer> propostas = TransferMarketService.gerarPropostas(jogador);
+            TransferOffer escolhida = TransferUI.exibirPropostas(jogador, propostas);
+            if (escolhida != null) {
+                jogador.setClubeAtual(escolhida.getClube());
+                roleAtual = escolhida.getRoleOferecido();
+            }
         }
 
-        // 9. Avançar idade e temporada
+        // 10. Avançar idade e temporada
         jogador.setIdade(jogador.getIdade() + 1);
         temporadaAtual++;
 
-        // 10. Verificar aposentadoria
+        // 11. Verificar aposentadoria voluntária
         String msgAposent = RetirementService.mensagemAposentadoriaVoluntaria(jogador, roleAtual);
         if (msgAposent != null) {
             System.out.println("\n⚠️  " + msgAposent);
@@ -141,7 +171,9 @@ public class CareerManager {
             }
         }
 
-        if (RetirementService.verificarAposentadoria(jogador, roleAtual, score)) {
+        // 12. Verificar aposentadoria automática — só se não perguntou antes
+        if (msgAposent == null &&
+            RetirementService.verificarAposentadoria(jogador, roleAtual, score)) {
             System.out.println("\n🎽 Sua carreira chegou ao fim naturalmente.");
             StatsUI.exibirTelaAposentadoria(jogador, stats);
             return false;

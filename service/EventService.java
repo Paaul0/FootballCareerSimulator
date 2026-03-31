@@ -10,11 +10,9 @@ public class EventService {
 
     private static final Random r = new Random();
 
-    // Eventos que NÃO são títulos (títulos agora vêm do ChampionshipService)
     private static final CareerEvent[] EVENTOS_DISPONIVEIS = {
             CareerEvent.LESAO_GRAVE,
             CareerEvent.ARTILHEIRO_DO_CAMPEONATO,
-            CareerEvent.REBAIXAMENTO,
             CareerEvent.CONVOCACAO_SELECAO,
             CareerEvent.ESCANDALO,
             CareerEvent.RENOVACAO_FORCADA,
@@ -48,7 +46,7 @@ public class EventService {
                 jogador.setAssistenciasUltimaFase((int)(jogador.getAssistenciasUltimaFase() * 0.6));
             }
             case ARTILHEIRO_DO_CAMPEONATO -> {
-                int bonus = (int)(jogador.getGolsUltimaFase() * 0.30);
+                int bonus = (int)(jogador.getGolsUltimaFase() * 0.20);
                 jogador.setGolsUltimaFase(jogador.getGolsUltimaFase() + bonus);
             }
             case CONVOCACAO_SELECAO ->

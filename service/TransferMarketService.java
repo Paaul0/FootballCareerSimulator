@@ -21,43 +21,68 @@ public class TransferMarketService {
             new Club("Vitória SC",          Country.PORTUGAL,  2),
             new Club("Defensor",            Country.URUGUAI,   2),
             new Club("Toluca",              Country.MEXICO,    2),
-            new Club("FC Dallas",           Country.EUA,       2)
+            new Club("FC Dallas",           Country.EUA,       2),
+            new Club("Strasbourg",          Country.FRANCA,    2),
+            new Club("Augsburg",            Country.ALEMANHA,  2),
+            new Club("Burnley",             Country.INGLATERRA,2)
     );
 
     private static final List<Club> CLUBES_NIVEL3 = List.of(
             new Club("Athletico-PR",  Country.BRASIL,    3),
             new Club("Internacional", Country.BRASIL,    3),
             new Club("Grêmio",        Country.BRASIL,    3),
+            new Club("Santos",        Country.BRASIL,    3),
+            new Club("São Paulo",     Country.BRASIL,    3),
             new Club("Racing Club",   Country.ARGENTINA, 3),
             new Club("San Lorenzo",   Country.ARGENTINA, 3),
+            new Club("Independiente", Country.ARGENTINA, 3),
             new Club("Porto",         Country.PORTUGAL,  3),
+            new Club("Sporting",      Country.PORTUGAL,  3),
+            new Club("Peñarol",       Country.URUGUAI,   3),
+            new Club("Nacional",      Country.URUGUAI,   3),
             new Club("Monterrey",     Country.MEXICO,    3),
-            new Club("Seattle",       Country.EUA,       3)
+            new Club("Club América",  Country.MEXICO,    3),
+            new Club("Seattle",       Country.EUA,       3),
+            new Club("LA Galaxy",     Country.EUA,       3),
+            new Club("Lyon",          Country.FRANCA,    3),
+            new Club("Borussia M.",   Country.ALEMANHA,  3),
+            new Club("Everton",       Country.INGLATERRA,3)
     );
 
     private static final List<Club> CLUBES_NIVEL4 = List.of(
-            new Club("Palmeiras",   Country.BRASIL,   4),
-            new Club("Atlético-MG", Country.BRASIL,   4),
-            new Club("Valencia",    Country.ESPANHA,  4),
-            new Club("Sevilla",     Country.ESPANHA,  4),
-            new Club("Lazio",       Country.ITALIA,   4),
-            new Club("Napoli",      Country.ITALIA,   4),
-            new Club("Lyon",        Country.ESPANHA,  4)
+            new Club("Corinthians",  Country.BRASIL,    4),
+            new Club("Flamengo",     Country.BRASIL,    4),
+            new Club("Palmeiras",    Country.BRASIL,    4),
+            new Club("Atlético-MG",  Country.BRASIL,    4),
+            new Club("Boca Juniors", Country.ARGENTINA, 4),
+            new Club("River Plate",  Country.ARGENTINA, 4),
+            new Club("Benfica",      Country.PORTUGAL,  4),
+            new Club("Valencia",     Country.ESPANHA,   4),
+            new Club("Sevilla",      Country.ESPANHA,   4),
+            new Club("Lazio",        Country.ITALIA,    4),
+            new Club("Napoli",       Country.ITALIA,    4),
+            new Club("Monaco",       Country.FRANCA,    4),
+            new Club("Bayer Lev.",   Country.ALEMANHA,  4),
+            new Club("Tottenham",    Country.INGLATERRA,4)
     );
 
     private static final List<Club> CLUBES_NIVEL5 = List.of(
-            new Club("Real Madrid",   Country.ESPANHA, 5),
-            new Club("Barcelona",     Country.ESPANHA, 5),
-            new Club("Manchester C.", Country.ESPANHA, 5),
-            new Club("PSG",           Country.ESPANHA, 5),
-            new Club("Bayern",        Country.ESPANHA, 5),
-            new Club("Juventus",      Country.ITALIA,  5),
-            new Club("Liverpool",     Country.ESPANHA, 5)
+            new Club("Real Madrid",   Country.ESPANHA,   5),
+            new Club("Barcelona",     Country.ESPANHA,   5),
+            new Club("Atlético Mad.", Country.ESPANHA,   5),
+            new Club("Manchester C.", Country.INGLATERRA,5),
+            new Club("Liverpool",     Country.INGLATERRA,5),
+            new Club("Arsenal",       Country.INGLATERRA,5),
+            new Club("PSG",           Country.FRANCA,    5),
+            new Club("Bayern",        Country.ALEMANHA,  5),
+            new Club("Borussia D.",   Country.ALEMANHA,  5),
+            new Club("Juventus",      Country.ITALIA,    5),
+            new Club("Inter Milan",   Country.ITALIA,    5)
     );
 
     public static List<TransferOffer> gerarPropostas(Player jogador) {
         List<TransferOffer> propostas = new ArrayList<>();
-        int score = PerformanceService.calcularScore(jogador);
+        int score     = PerformanceService.calcularScore(jogador);
         int nivelAtual = jogador.getClubeAtual().getNivel();
 
         int chance;
